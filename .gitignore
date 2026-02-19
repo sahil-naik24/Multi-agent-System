@@ -1,0 +1,11 @@
+.env
+setup_project.py
+myenv
+myenv/
+/chroma_db
+**/__pycache__
+data
+data/raw/
+chat_history.db
+agent_logs/
+uploaded_pdfs/
