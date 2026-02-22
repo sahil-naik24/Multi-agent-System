@@ -14,7 +14,6 @@ from langchain_chroma import Chroma
 
 load_dotenv()
 
-print("test_var = ",os.getenv("AZURE_OPENAI_EMB_MODEL_NAME"))
 persist_directory = CONFIG.CHROMA_DB_PATH
 embedding_model = AzureOpenAIEmbeddings(
     model=os.getenv("AZURE_OPENAI_EMB_MODEL_NAME"),           
@@ -75,7 +74,8 @@ async def run_query(request: QueryRequest):
             "next_steps": [],
             "sub_queries": {},
             "agent_outputs": {},
-            "final_output": ""
+            "final_output": "",
+            "last_state":""
         }
         config = {"configurable": {"thread_id": request.session_id}}
         result = await app_graph.ainvoke(initial_state, config=config)
@@ -87,7 +87,7 @@ async def run_query(request: QueryRequest):
             result = result[-1]
 
         final_answer = result.get("final_output", "No response generated.")        
-        print(final_answer)
+        # print("last state =" ,final_answer["last_state"])
         return QueryResponse(
             final_response=final_answer,
             success=True

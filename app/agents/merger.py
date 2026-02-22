@@ -15,7 +15,7 @@ class MergeAgent(BaseAgent):
         """
         Merge outputs from specialist agents.
         """
-
+        state["last_state"] = "Merger"
         agent_outputs = state.get("agent_outputs", {})
         print("lenght of agent outputs = ",len(agent_outputs))
 

@@ -8,11 +8,15 @@ search_wrapper = DuckDuckGoSearchAPIWrapper()
 @tool
 def medical_search(query: str) -> str:
     """
-    Search for medical information related to a health query.
-    Use this when you need factual or up-to-date medical information.
+    Retrieve reliable medical information relevant to a health-related query.
+    Use this tool when factual, up-to-date, or condition-specific information is required.
     """
-    refined_query = f"{query} medical information"
-    results = search_wrapper.results(refined_query, max_results=3)
+    refined_query = f"{query} medical health information"
+
+    results = search_wrapper.results(refined_query, max_results=5)
+
+    if not results:
+        return "No relevant medical information found."
 
     formatted = "\n\n".join(
         f"Title: {r['title']}\n"
@@ -20,5 +24,3 @@ def medical_search(query: str) -> str:
         f"Snippet: {r['snippet']}"
         for r in results
     )
-
-    return formatted

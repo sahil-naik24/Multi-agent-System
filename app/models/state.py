@@ -16,6 +16,7 @@ def merge_or_reset(current: Dict, update: Optional[Dict]) -> Dict:
     # This keeps your parallel agents safe
     return {**current, **update}
 
+
 class AgentState(TypedDict, total=False):
 
     messages: Annotated[List[BaseMessage], operator.add]
@@ -24,4 +25,14 @@ class AgentState(TypedDict, total=False):
     sub_queries: Dict[str, str]
     agent_outputs: Annotated[Dict[str, str], merge_or_reset]
     final_output: str
+
+    normalized_input: str
+    security_verdict: str
+    security_reason: str
+    security_confidence: str
+    detection_level: str
+
+    last_state: str
+
+
 

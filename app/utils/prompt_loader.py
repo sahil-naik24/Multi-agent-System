@@ -13,6 +13,7 @@ def load_prompt(prompt_name: str) -> str:
 
     base_path = Path(__file__).resolve().parent.parent / "prompts"
     file_path = base_path / f"{prompt_name}.md"
+    print("prompt_path =", file_path)
 
     if not file_path.exists():
         raise FileNotFoundError(f"Prompt file not found: {file_path}")

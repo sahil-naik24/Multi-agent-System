@@ -1,5 +1,4 @@
 from typing import Dict, Any
-
 from langchain_core.messages import AIMessage
 from langchain_classic.agents import create_tool_calling_agent, AgentExecutor #change later
 from app.agents.base import BaseAgent
@@ -19,7 +18,7 @@ class HealthcareAgent(BaseAgent):
         self.agent = create_tool_calling_agent(
             self.llm,
             self.tools,
-            prompt=self._create_prompt()
+            prompt=self._build_prompt()
         )
         self.executor = AgentExecutor(
             agent=self.agent,
@@ -27,7 +26,7 @@ class HealthcareAgent(BaseAgent):
             verbose=False
         )
 
-    def _create_prompt(self):
+    def _build_prompt(self):
 
         return ChatPromptTemplate.from_messages(
             [
@@ -40,9 +39,9 @@ class HealthcareAgent(BaseAgent):
     async def invoke(self, state: AgentState) -> Dict[str, Any]:
         """
         Healthcare domain agent.
-        Uses tool-calling with DuckDuckGo search.
         """
-
+        state["last_state"] = "healthcare"
+        print("Enter ")
         # Use sub-query from router
         sub_queries = state.get("sub_queries", {})
         query = sub_queries.get("healthcare")

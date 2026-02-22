@@ -30,7 +30,7 @@ class ParentAgent(BaseAgent):
         """
             Parent agent for routing
         """
-        print("Entered Router: state = ",state)
+        state["last_state"] = "router"
         
         # Get latest user message
         if not state.get("messages"):
@@ -65,9 +65,9 @@ class ParentAgent(BaseAgent):
             "timestamp": self.logger.current_timestamp(),
             "agent": "router",
             "user_query": user_query,
-            "constructed_prompt": full_prompt,
-            "raw_output": response.content,
             "parsed_output": parsed,
+            "constructed_prompt": full_prompt,
+            
         }
         self.logger.log(log_data)
 

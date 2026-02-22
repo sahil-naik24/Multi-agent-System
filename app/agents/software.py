@@ -19,6 +19,7 @@ class SoftwareAgent(BaseAgent):
         Uses internal LLM knowledge only.
         """
 
+        state["last_state"] = "software"
         # Get sub-query from router
         sub_queries = state.get("sub_queries", {})
         query = sub_queries.get("software")

@@ -13,13 +13,14 @@ class LawyerAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         self.retriever = LegalRetriever()
-        self.system_prompt = load_prompt("legal")
+        self.lawyer_prompt = load_prompt("legal")
         self.logger = AgentLogger("agent_logs/legal_agent_logs.jsonl")
 
     async def invoke(self, state: AgentState) -> Dict[str, Any]:
         # Full conversation context
+        state["last_state"] = "legal"
         sub_queries = state.get("sub_queries", {})
-        query = sub_queries.get("healthcare")
+        query = sub_queries.get("legal")
         conversation = "\n".join(
             [f"{type(m).__name__}: {m.content}" for m in state["messages"]]
         )
@@ -28,31 +29,25 @@ class LawyerAgent(BaseAgent):
         context = self.retriever.retrieve(state["query"])
         print("context = ",context)
 
-        full_prompt = self.router_prompt.format(
+        full_prompt = self.lawyer_prompt.format(
             context = context,
-            chat_history=state["messages"],
+            chat_history=conversation,
             question=query
-)
+        )
 
-        messages = [
-            SystemMessage(content=self.system_prompt),
-            HumanMessage(content=full_prompt)
-        ]
-
-        response = await self.llm.ainvoke(messages)
+        response = await self.llm.ainvoke(full_prompt)
 
         log_data = {
             "timestamp": self.logger.current_timestamp(),
             "agent": "router",
-            "user_query": user_query,
+            "user_query": query,
             "context": context,
-            "constructed_prompt": augmented_prompt,
+            "constructed_prompt": full_prompt,
             "raw_output": response.content,
         }
         self.logger.log(log_data)
 
         return {
-            # Append to conversation safely
             "messages": [
                 AIMessage(content=response.content, name="legal")
             ],
