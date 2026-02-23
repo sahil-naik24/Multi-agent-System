@@ -1,23 +1,12 @@
 # ChromaDB connection logic
-import os
-from dotenv import load_dotenv
 import app.core.config as CONFIG
-from langchain_openai import AzureOpenAIEmbeddings
+from app.llm.get_embedding_model import get_embedding_model 
 from langchain_chroma import Chroma
-
-load_dotenv()
 
 class ChromaHandler:
     def __init__(self):
         # Use LangChain's Chroma wrapper with Azure embeddings
-        self.embedding_fn =AzureOpenAIEmbeddings(
-        model=os.getenv("AZURE_OPENAI_EMB_MODEL_NAME"),           # optional in Azure
-        deployment=os.getenv("AZURE_OPENAI_EMB_DEPLOYMENT_NAME"),      # Azure deployment name
-        azure_endpoint=os.getenv("AZURE_OPENAI_EMB_ENDPOINT"),
-        api_key=os.getenv("AZURE_OPENAI_EMB_API_KEY"),
-        openai_api_version=os.getenv("AZURE_OPENAI_EMB_API_VERSION")
-        )
-
+        self.embedding_fn = get_embedding_model()
         # Create or load a persistent collection
         self.vectorstore = Chroma(
             collection_name=CONFIG.CHROMA_DB_COLLECTION,

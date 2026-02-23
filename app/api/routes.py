@@ -5,64 +5,38 @@ from fastapi import APIRouter, HTTPException, UploadFile, File
 from langchain_core.messages import HumanMessage
 from app.models.state import AgentState
 from app.models.schemas import QueryRequest, QueryResponse
-from langchain_community.document_loaders import PyMuPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from app.rag.data_ingestion.ingestion_service import DocumentIngestionService
 from app.workflow.graph import app_graph
 import app.core.config as CONFIG
-from langchain_openai import AzureOpenAIEmbeddings
-from langchain_chroma import Chroma
 
 load_dotenv()
 
-persist_directory = CONFIG.CHROMA_DB_PATH
-embedding_model = AzureOpenAIEmbeddings(
-    model=os.getenv("AZURE_OPENAI_EMB_MODEL_NAME"),           
-    deployment=os.getenv("AZURE_OPENAI_EMB_DEPLOYMENT_NAME"),      
-    azure_endpoint=os.getenv("AZURE_OPENAI_EMB_ENDPOINT"),
-    api_key=os.getenv("AZURE_OPENAI_EMB_API_KEY"),
-    openai_api_version=os.getenv("AZURE_OPENAI_EMB_API_VERSION")
-)
-vectordb = Chroma(persist_directory=persist_directory, embedding_function=embedding_model, collection_name=CONFIG.CHROMA_DB_COLLECTION)
-
 router = APIRouter()
 
-UPLOAD_DIR = "uploaded_pdfs"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(CONFIG.LOCAL_DOCUMENT_DIRECTORY, exist_ok=True)
 
 @router.post("/upload")
 async def upload_pdfs(files: List[UploadFile] = File(...)):
-    """Upload multiple PDFs, save to folder, and ingest into ChromaDB"""
     total_chunks = 0
-    saved_files = []
+    skipped_files = []
+    ingested_files = []
+
+    document_ingestion_service = DocumentIngestionService()
 
     for file in files:
         if not file.filename.endswith(".pdf"):
-            continue  # skip non-PDFs
+            continue
 
-        # Save uploaded PDF to the upload folder
-        save_path = os.path.join(UPLOAD_DIR, file.filename)
+        save_path = os.path.join(CONFIG.LOCAL_DOCUMENT_DIRECTORY, file.filename)
         with open(save_path, "wb") as f:
             f.write(await file.read())
-        saved_files.append(save_path)
 
-        # Load PDF and split into chunks
-        loader = PyMuPDFLoader(save_path)
-        docs = loader.load()
+        response = document_ingestion_service.ingest_pdf(save_path)
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-        chunks = text_splitter.split_documents(docs)
+    if not ingested_files and not skipped_files:
+        raise HTTPException(status_code=400, detail="No valid PDFs uploaded")
 
-        # Add chunks to ChromaDB
-        vectordb.add_documents(chunks, collection_name="legal_documents")
-        total_chunks += len(chunks)
-
-    if not saved_files:
-        raise HTTPException(status_code=400, detail="No valid PDF files uploaded.")
-
-    return {
-        "message": f"{total_chunks} chunks ingested from {len(saved_files)} files.",
-        "files": saved_files
-    }
+    return response
 
 @router.post("/query", response_model=QueryResponse)
 async def run_query(request: QueryRequest):
