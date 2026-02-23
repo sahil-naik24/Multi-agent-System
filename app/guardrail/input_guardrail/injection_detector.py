@@ -1,10 +1,8 @@
 from typing import Dict
+import app.core.config as CONFIG
 from app.guardrail.input_guardrail.hard_rule_scanner import HardRuleScanner
 from app.guardrail.input_guardrail.llm_injection_classifier import LLMInjectionClassifier
 from app.utils.agent_logger import AgentLogger
-from app.utils.prompt_loader import load_prompt
-
-
 
 class InputInjectionDetector:
     def __init__(
@@ -15,15 +13,13 @@ class InputInjectionDetector:
         self.llm_classifier = LLMInjectionClassifier()
         self.fail_closed = fail_closed
         self.allowed_verdicts = {"ALLOW", "BLOCK", "FLAG"}
-        self.logger = AgentLogger("agent_logs/security_logs.jsonl")
+        self.logger = AgentLogger(CONFIG.SECURITY_LOG_PATH)
 
     async def invoke(self, state: Dict) -> Dict:
         user_input = state.get("query", "")
 
         try:
-            # ----------------------------
-            # 1️⃣ Hard Rule Scan (sync, safe)
-            # ----------------------------
+            #Hard Rule Scan (sync, safe)
             print("Initialized input prompt injection detection")
             rule_result = self.rule_scanner.scan(user_input)
             print("rule_result hard scan=",rule_result, rule_result.status)

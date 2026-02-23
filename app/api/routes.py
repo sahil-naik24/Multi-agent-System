@@ -9,15 +9,12 @@ from app.rag.data_ingestion.ingestion_service import DocumentIngestionService
 from app.workflow.graph import app_graph
 import app.core.config as CONFIG
 
-load_dotenv()
-
 router = APIRouter()
 
 os.makedirs(CONFIG.LOCAL_DOCUMENT_DIRECTORY, exist_ok=True)
 
 @router.post("/upload")
 async def upload_pdfs(files: List[UploadFile] = File(...)):
-    total_chunks = 0
     skipped_files = []
     ingested_files = []
 

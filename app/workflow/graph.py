@@ -1,21 +1,14 @@
 """
-LangGraph Construction
-Multi-Agent Healthcare / Legal / Software System
-With MongoDB Checkpointer
+LangGraph Construction for Multi-Agent system
 """
-
 from langgraph.graph import StateGraph, END
 from app.models.state import AgentState
-
-# Agents
 from app.agents.router import ParentAgent
 from app.agents.healthcare import HealthcareAgent
 from app.agents.legal import LawyerAgent
 from app.agents.software import SoftwareAgent
 from app.agents.merger import MergeAgent
 from app.guardrail.input_guardrail.injection_detector import InputInjectionDetector
-
-# Checkpointer
 from app.db.mongo import checkpointer
 
 router_agent = ParentAgent()
@@ -34,24 +27,19 @@ async def call_router(state: AgentState):
 async def call_healthcare(state: AgentState):
     return await healthcare_agent.invoke(state)
 
-
 async def call_legal(state: AgentState):
     return await legal_agent.invoke(state)
 
-
 async def call_software(state: AgentState):
     return await software_agent.invoke(state)
-
 
 async def call_merger(state: AgentState):
     return await merger_agent.invoke(state)
 
 def route_decision(state: AgentState):
     """
-    Determines next nodes after router execution.
-    Supports parallel execution.
+    Determines next nodes after router execution.Supports parallel execution.
     """
-    print("enter route decision")
     next_steps = state.get("next_steps", [])
     mapping = {
         "healthcare": "healthcare_node",
@@ -63,20 +51,16 @@ def route_decision(state: AgentState):
         for step in next_steps
         if step in mapping
     ]
-
     # If invalid or empty → end graph
     if not destinations:
         return END
-    print("route decision taken")
     return destinations
 
-
-# --------------------------------------------------
 # Graph Construction
-# --------------------------------------------------
 try:
     workflow = StateGraph(AgentState)
 
+    # Node Defination
     workflow.add_node("input_security_node", call_input_injection_detector)
     workflow.add_node("router_node", call_router)
     workflow.add_node("healthcare_node", call_healthcare)
@@ -84,6 +68,7 @@ try:
     workflow.add_node("software_node", call_software)
     workflow.add_node("merger_node", call_merger)
 
+    # Workflow
     workflow.set_entry_point("input_security_node")
     workflow.add_conditional_edges(
         "input_security_node",
@@ -94,18 +79,13 @@ try:
             "BLOCK": END,
         },
     )
-
-
     workflow.add_conditional_edges(
         "router_node",
         route_decision
     )
-
     workflow.add_edge("healthcare_node", "merger_node")
     workflow.add_edge("legal_node", "merger_node")
     workflow.add_edge("software_node", "merger_node")
-
-    
     workflow.add_edge("merger_node", END)
 
     app_graph = workflow.compile(checkpointer=checkpointer)

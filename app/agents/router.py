@@ -12,6 +12,7 @@ import re
 from typing import Dict, Any
 from langchain_core.messages import HumanMessage, AIMessage
 from app.agents.base import BaseAgent
+from app.agents.agent_definations import AVAILABLE_AGENTS
 from app.utils.prompt_loader import load_prompt
 import app.core.config as CONFIG 
 from app.utils.agent_logger import AgentLogger
@@ -49,7 +50,7 @@ class ParentAgent(BaseAgent):
                 "messages": [AIMessage(content="Query rejected due to unsafe instructions.", name="router")]
             }
         
-        agents_description = "\n".join(f'{k}: {v}' for k,v in CONFIG.AVAILABLE_AGENTS.items())
+        agents_description = "\n".join(f'{k}: {v}' for k,v in AVAILABLE_AGENTS.items())
 
         # Build prompt
         full_prompt = self.router_prompt.format(
