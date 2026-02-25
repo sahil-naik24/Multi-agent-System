@@ -28,7 +28,6 @@ class ChromaHandler:
         results = self.vectorstore.similarity_search(
             query_text, k=n_results
         )
-        print("query result = ",results)
         # Returns just the texts
         return [doc.page_content for doc in results]
 

@@ -20,10 +20,7 @@ class InputInjectionDetector:
 
         try:
             #Hard Rule Scan (sync, safe)
-            print("Initialized input prompt injection detection")
             rule_result = self.rule_scanner.scan(user_input)
-            print("rule_result hard scan=",rule_result, rule_result.status)
-
             security_reasons= ",".join(rule_result.reasons)
             if rule_result.status == "BLOCK":
                 log_data = {

@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from typing import List
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from langchain_core.messages import HumanMessage
@@ -41,14 +40,17 @@ async def run_query(request: QueryRequest):
         # 1. Initialize State
         initial_state: AgentState = {
             "messages": [HumanMessage(content=request.query)],
+            "messages_healthcare": [],
+            "messages_legal":[],
+            "messages_software":[],
             "query": request.query,
             "next_steps": [],
             "sub_queries": {},
             "agent_outputs": {},
             "final_output": "",
-            "last_state":""
+            "last_state":"",
         }
-        config = {"configurable": {"thread_id": request.session_id}}
+        config = {"configurable": {"thread_id": request.session_id},"recursion_limit": 15}
         result = await app_graph.ainvoke(initial_state, config=config)
         # print(app_graph.get_state(config))
 

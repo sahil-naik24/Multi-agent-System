@@ -6,7 +6,7 @@ import uuid
 # Configuration
 # ─────────────────────────────────────────────
 API_URL = "http://127.0.0.1:8000/api/v1/query"
-UPLOAD_URL = "http://127.0.0.1:8000/upload"
+UPLOAD_URL = "http://127.0.0.1:8000/api/v1/upload"
 
 # Generate persistent session id per browser session
 def get_session_id():

@@ -19,7 +19,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Multi-Agent Intelligent System",lifespan=lifespan
+app = FastAPI(title="Multi-Agent Intelligent System",
+            #   lifespan=lifespan
 )
 
 

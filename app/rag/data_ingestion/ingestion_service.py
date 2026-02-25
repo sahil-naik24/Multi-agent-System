@@ -57,6 +57,7 @@ class DocumentIngestionService:
             chunks,
             collection_name="legal_documents"
         )
+        print("document ingested :",pdf_path)
 
         return {
             "status": "ingested",

@@ -8,16 +8,12 @@ class LLMInjectionClassifier:
         self.llm = get_chat_model()
         self.guardrail_prompt = load_prompt("input_guardrail")
 
-
     async def classify(self, user_input: str) -> Dict:
-        print("llm invoke")
         full_prompt = self.guardrail_prompt.format(
             user_input=user_input
         )
-        print("llm prompt =",full_prompt)
         try:
             response = await self.llm.ainvoke(full_prompt)
-            print("llm response =",response)
             return self._safe_parse(response.content)
         except Exception:
             print("error")
