@@ -20,9 +20,7 @@ def merge_or_reset(current: Dict, update: Optional[Dict]) -> Dict:
 class AgentState(TypedDict, total=False):
 
     messages: Annotated[List[BaseMessage], operator.add]
-    messages_healthcare: Annotated[List[BaseMessage], operator.add]
-    messages_legal: Annotated[List[BaseMessage], operator.add]
-    messages_software: Annotated[List[BaseMessage], operator.add]
+    agent_workspace: Annotated[Dict[str, List[BaseMessage]], merge_or_reset]
     query: str
     next_steps: List[str]
     sub_queries: Dict[str, str]
@@ -37,12 +35,6 @@ class AgentState(TypedDict, total=False):
 
     last_state: str
 
-    # ───────── Tool Orchestration (PER AGENT) ─────────
-    tool_requests: Dict[str, Dict[str, Any]]     # agent_name → request
-    tool_results: Dict[str, Dict[str, Any]]      # agent_name → result
-    tool_calls_count: Dict[str, int]              # agent_name → count
-
-    sender: str
 
 
 

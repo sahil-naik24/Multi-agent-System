@@ -7,22 +7,18 @@ search_wrapper = DuckDuckGoSearchAPIWrapper()
 @tool
 def web_search_tool(query: str) -> str:
     """
-    Search the web for up-to-date information, news, or specific factual data.
-    Use this tool when internal knowledge is insufficient or current events are required.
-    
-    Args:
-        query: The specific search string.
+    Retrieve publicly available information from the web.
+    This tool is domain-agnostic and may be used by any agent
+    The tool returns summarized excerpts from multiple web sources.
+    If no relevant results are found, the tool returns:
+    NO_RELEVANT_RESULTS
     """
     try:
-        # We remove the hardcoded "medical" prefix to make it general-purpose.
-        # The LLM (Healthcare, Legal, or Software) will naturally provide the 
-        # domain context in the 'query' parameter based on its persona.
         results = search_wrapper.results(query, max_results=5)
 
         if not results:
             return f"No relevant information found for: {query}"
 
-        # Improved formatting for LLM readability
         formatted_list = []
         for r in results:
             entry = (

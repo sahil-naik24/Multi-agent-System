@@ -4,16 +4,29 @@ from app.db.vector_store import chroma_handler
 @tool
 def internal_knowledge_base(query: str) -> str:
     """
-    Search the internal vector database for authoritative information. 
-    Contains legal precedents, healthcare protocols, and internal technical documentation.
-    Use this tool when you need verified, non-public data.
+    Retrieve authoritative information from the internal knowledge base.
+
+    This tool searches user-uploaded documents, organizational records,
+    and internally approved reference materials across all supported domains
+    (e.g., legal, healthcare, software, finance, technical documentation).
+
+    Use this tool when:
+    - You need verified, citation-ready information
+    - The query requires domain-specific accuracy
+    - The answer must be grounded in internal documents
+    - You need authoritative definitions, policies, standards, or procedures
+
+    The tool returns verbatim excerpts from relevant internal documents.
+
+    If no relevant documents are found, the tool returns:
+    NO_RELEVANT_DOCUMENTS
     """
     try:
         # chroma_handler should ideally return Document objects or text chunks
         docs = chroma_handler.query_documents(query)
         
         if not docs:
-            return f"No internal records found related to: {query}"
+            return "NO_RELEVANT_DOCUMENTS"
         
         # We improve formatting to include markers that help the LLM cite sources
         formatted_chunks = []
